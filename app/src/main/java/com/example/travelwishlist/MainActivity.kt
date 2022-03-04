@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity(), OnListItemClickedListener, OnDataChang
         newPlaceEditText.text.clear()
         reasonToTravel.text.clear()
     }
-
+    // Overrides our interface function of the PlaceRecyclerAdapter.
     override fun onListItemClicked(place: Place) {
         // uses implicit intents to tell the Device to use an app that takes location URIs and display
         // a location that matches the name of the place.
@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity(), OnListItemClickedListener, OnDataChang
         // starts the activity with the implicit intent.
         startActivity(mapIntent)
     }
-
+    // Last two Override our interface functions of the OnListItemSwipeListener class.
     override fun onListItemMoved(from: Int, to: Int) {
         // Calls the function of the places view model that two views were moved.
         placesViewModel.movePlace(from, to)
