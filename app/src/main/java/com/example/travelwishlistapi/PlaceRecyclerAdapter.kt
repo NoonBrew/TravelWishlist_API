@@ -1,8 +1,9 @@
-package com.example.travelwishlist
+package com.example.travelwishlistapi
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -10,10 +11,11 @@ import androidx.recyclerview.widget.RecyclerView
 // Interface allows for the function to be used in our PlaceRecyclerAdapter Class and overridden
 // In our main activity.
 interface OnListItemClickedListener {
-    fun onListItemClicked(place: Place)
+    fun onMapRequestButtonClicked(place: Place)
+    fun onStarredStatusChanged(place: Place, isStarred: Boolean)
 }
 
-class PlaceRecyclerAdapter(private val places: List<Place>,
+class PlaceRecyclerAdapter(var places: List<Place>,
                            private val onListItemClickedListener: OnListItemClickedListener) :
     RecyclerView.Adapter<PlaceRecyclerAdapter.ViewHolder>() {
 
@@ -25,23 +27,29 @@ class PlaceRecyclerAdapter(private val places: List<Place>,
                 // We hook up all the Widgets and textViews in the bind function since they will be
                 // slightly different for each place in our list.
                 val placeNameTextView: TextView = view.findViewById(R.id.place_name)
+
+                val starCheck: CheckBox = view.findViewById(R.id.star_check_box)
                 // Assigns data to our views from our list.
                 placeNameTextView.text = place.name
+
+                val reasonToVisit: TextView = view.findViewById(R.id.reason_why)
+                reasonToVisit.text = place.reason
 
                 val mapIcon: ImageView = view.findViewById(R.id.map_icon)
                 // Set up a onclick listener and passes data to our interface function so that
                 // We use MainActivity to override this function and send an implicit intent
                 mapIcon.setOnClickListener {
-                    onListItemClickedListener.onListItemClicked(place)
+                    onListItemClickedListener.onMapRequestButtonClicked(place)
+                }
+                // Initially set the listener to null to avoid a feedback loop.
+                // Do we need this  if the logic is in order?
+                starCheck.setOnClickListener(null) // remove listener
+                starCheck.isChecked = place.starred // Update with value, default true.
+                starCheck.setOnClickListener{ // replace listener - avoid endless loop.
+                    onListItemClickedListener.onStarredStatusChanged(place, starCheck.isChecked)
                 }
 
-                // Sets up the last few views.
-                val createdOnText = view.context.getString(R.string.created_on, place.formattedDate())
-                val dateCreatedOnTextView: TextView = view.findViewById(R.id.date_place_added)
-                dateCreatedOnTextView.text = createdOnText
 
-                val reasonToVisit: TextView = view.findViewById(R.id.reason_why)
-                reasonToVisit.text = place.reason
             }
 
         }

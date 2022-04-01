@@ -1,4 +1,4 @@
-package com.example.travelwishlist
+package com.example.travelwishlistapi
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
