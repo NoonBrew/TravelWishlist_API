@@ -1,16 +1,20 @@
 package com.example.travelwishlistapi
 
 import retrofit2.Response
-import retrofit2.http.GET
+import retrofit2.http.*
 
 interface PlaceService {
-
+    // Place services passes the returned values to PlaceRepository
     @GET("places/")
     suspend fun getAllPlaces(): Response<List<Place>>
 
-    // todo POST create place
+    //POST Create a place
+    @POST("places/")
+    suspend fun addPlace(@Body place: Place): Response<Place>
 
-    // todo update place
+    @PATCH("places/{id}/")
+    suspend fun updatePlace(@Body place: Place, @Path("id") id: Int): Response<Place>
 
-    // todo delete place
+    @DELETE("places/{id}/")
+    suspend fun deletePlace(@Path("id") id: Int): Response<String>
 }

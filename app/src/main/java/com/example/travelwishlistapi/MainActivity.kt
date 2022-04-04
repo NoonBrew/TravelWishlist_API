@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
@@ -22,6 +23,7 @@ class MainActivity : AppCompatActivity(), OnListItemClickedListener, OnDataChang
     private lateinit var reasonToTravel: EditText
     private lateinit var addNewPlaceButton: Button
     private lateinit var placeListRecyclerView: RecyclerView
+    private lateinit var wishListContainer: View
 
     private lateinit var placeRecyclerAdapter: PlaceRecyclerAdapter
 
@@ -37,6 +39,7 @@ class MainActivity : AppCompatActivity(), OnListItemClickedListener, OnDataChang
         addNewPlaceButton = findViewById(R.id.add_new_place_button)
         newPlaceEditText = findViewById(R.id.new_place_name)
         reasonToTravel = findViewById(R.id.reason_to_travel)
+        wishListContainer = findViewById(R.id.wishlist_container)
 
 //        val places = placesViewModel.getPlaces() // list of place objects
 
@@ -55,10 +58,19 @@ class MainActivity : AppCompatActivity(), OnListItemClickedListener, OnDataChang
         addNewPlaceButton.setOnClickListener {
             addNewPlace()
         }
-
+        // Observes the allPlaces value that is a MutableListOf places pulled from the API Server
+        // It passes that list to the RecyclerAdapter and notifies the adapter if the data in that
+        // List changes.
         placesViewModel.allPlaces.observe(this) { places ->
             placeRecyclerAdapter.places = places
             placeRecyclerAdapter.notifyDataSetChanged()
+        }
+        // Provides a message to the user via SnackBar from the ViewModel when an action is taken
+        // on a place object.
+        placesViewModel.userMessage.observe(this) { message ->
+            if (message != null) {
+                Snackbar.make(wishListContainer, message, Snackbar.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -76,21 +88,21 @@ class MainActivity : AppCompatActivity(), OnListItemClickedListener, OnDataChang
         } else {
             // If there is a valid name and reason we store the place as a new place Object with the name
                 // and reason.
-//            val newPlace = Place(name, reason)
-            // We then pass that object to our placesViewModel to add it and store the position returned
-            // by the view model.
-//            val positionAdded = placesViewModel.addNewPlace(newPlace)
-            // If that place is already in our list of Places we return a -1 and do not actually add it.
+            val newPlace = Place(name, reason)
+//             We then pass that object to our placesViewModel to add it and store the position returned
+//             by the view model.
+            val positionAdded = placesViewModel.addNewPlace(newPlace)
+//             If that place is already in our list of Places we return a -1 and do not actually add it.
 //            if (positionAdded == -1) {
-//                // warning to update the user it already exists.
+//                 warning to update the user it already exists.
 //                Toast.makeText(this, "You already added that place.", Toast.LENGTH_SHORT).show()
-//            }else { TODO
-                // Notifies the adapater a new object was added to the list of places and to update.
+//            }else {
+//                 Notifies the adapater a new object was added to the list of places and to update.
 //                placeRecyclerAdapter.notifyItemInserted(positionAdded)
                 // calls our clearForm and hideKeyboard functions.
                 clearForm()
                 hideKeyboard()
-//            } TODO+
+//            }
         }
 
     }
@@ -131,23 +143,9 @@ class MainActivity : AppCompatActivity(), OnListItemClickedListener, OnDataChang
 //    }
 
     override fun onListItemDeleted(position: Int) {
-        // stores a Place Object at a given position determined by the location of the view on screen.
-//        val deletedPlace = placesViewModel.deletePlace(position) TODO
-        // Tells the adaptor a view was deleted and to update the views on screen.
-        placeRecyclerAdapter.notifyItemRemoved(position)
 
-        // SnackBar displays a delete message and offers an undo button to restore the deleted item.
-//        Snackbar.make(findViewById(R.id.wishlist_container),
-//            getString(R.string.place_deleted, deletedPlace.name),
-//            Snackbar.LENGTH_LONG)
-//            // sets the text color of the message and the background of the snack bar.
-//            .setActionTextColor(ContextCompat.getColor(this, R.color.white))
-//            .setBackgroundTint(ContextCompat.getColor(this, R.color.black))
-//            // Sets the action of the undo string. If it is clicked it tells the viewModel to add
-//            // a new place wit the deleted items.
-//            .setAction(getString(R.string.undo)) {
-//                placesViewModel.addNewPlace(deletedPlace, position)
-//                placeRecyclerAdapter.notifyItemInserted(position)
-//            }.show()
+        val place = placeRecyclerAdapter.places[position]
+        placesViewModel.deletePlace(place)
+
     }
 }

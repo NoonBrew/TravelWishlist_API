@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 const val TAG = "PlaceViewModel"
+
 class PlacesViewModel: ViewModel() {
 
     // Sample data for app testing of a list of Lists
@@ -15,7 +16,7 @@ class PlacesViewModel: ViewModel() {
     private val placesRepository = PlaceRepository()
 
     val allPlaces = MutableLiveData<List<Place>>(listOf())
-
+    val userMessage = MutableLiveData<String>(null)
     init {
         getPlaces()
     }
@@ -25,27 +26,44 @@ class PlacesViewModel: ViewModel() {
         // Suspend functions run in the background so to view the data we can use
         // Coroutines to move them from suspend.
         viewModelScope.launch {
-            val places = placesRepository.getAllPlaces()
-            allPlaces.postValue(places)
+            val apiResult = placesRepository.getAllPlaces()
+            if (apiResult.status == ApiStatus.SUCCESS) {
+                allPlaces.postValue(apiResult.data)
+            } else {
+                userMessage.postValue(apiResult.message)
+            }
         }
     }
 
     // Add a new place to our list, Position is not required but is a needed perimeter for when
     // restoring deleted places.
     fun addNewPlace(place: Place) {
-
-        // TODO
-
-    }
-
-
-    // Called when a view is deleted from our recycleListView. Deletes it from our mutable list as well.
-    fun deletePlace(place: Place) {
-        // TODO
+        viewModelScope.launch {
+            val apiResult = placesRepository.addPlace(place)
+            closureDialogRefresh(apiResult)
+        }
 
     }
 
     fun updatePlace(place: Place) {
-        // todo
+        viewModelScope.launch {
+            val apiResult = placesRepository.updatePlace(place)
+            closureDialogRefresh(apiResult)
+        }
+    }
+
+
+    fun deletePlace(place: Place) {
+        viewModelScope.launch {
+            val apiResult = placesRepository.deletePlace(place)
+            closureDialogRefresh(apiResult)
+        }
+    }
+    // Handles setting the message value from the Repository and will Update the screen.
+    private fun closureDialogRefresh (result: ApiResult<Any>){
+        if (result.status == ApiStatus.SUCCESS) {
+            getPlaces()
+        }
+        userMessage.postValue(result.message)
     }
 }

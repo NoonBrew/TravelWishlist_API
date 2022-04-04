@@ -2,8 +2,8 @@ package com.example.travelwishlistapi
 
 import java.text.SimpleDateFormat
 import java.util.*
-// Gave reason a default value so I would not need to change my example data.
-class Place(val name: String, val reason: String? = "Loves Travel",
+// set to a data class for a toString method
+data class Place(val name: String, val reason: String? = null,
             var starred: Boolean = false, val id: Int? = null) {
 
 }
